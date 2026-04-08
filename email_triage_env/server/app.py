@@ -26,6 +26,7 @@ except ImportError:
 
 from openenv.core.env_server.types import Observation
 from fastapi.responses import HTMLResponse
+from fastapi import Request
 
 # Create the FastAPI app using OpenEnv's create_app helper
 app = create_app(
@@ -34,6 +35,32 @@ app = create_app(
     EmailTriageObservation,
     env_name="email_triage_env",
 )
+
+# Dedicated persistent Environment instance and routes specifically for Frontend Web UI mapping
+ui_env = EmailTriageEnvironment()
+
+@app.post("/api/ui_reset")
+async def ui_reset(request: Request):
+    data = await request.json()
+    task_type = data.get("task_type", "classify_email")
+    obs = ui_env.reset(task_type=task_type)
+    return {
+        "observation": obs.model_dump(exclude_none=False) if hasattr(obs, "model_dump") else obs.__dict__,
+        "reward": getattr(obs, "reward", 0.0),
+        "done": obs.done
+    }
+
+@app.post("/api/ui_step")
+async def ui_step(request: Request):
+    data = await request.json()
+    action_dict = data.get("action", {})
+    action = EmailTriageAction(**action_dict)
+    obs = ui_env.step(action)
+    return {
+        "observation": obs.model_dump(exclude_none=False) if hasattr(obs, "model_dump") else obs.__dict__,
+        "reward": getattr(obs, "reward", 0.0),
+        "done": obs.done
+    }
 
 @app.get("/", response_class=HTMLResponse)
 async def landing_page():
@@ -300,7 +327,7 @@ async def landing_page():
                 logMsg(`Resetting environment instance for schema: ${task_type}...`);
 
                 try {
-                    const res = await fetch('/reset', {
+                    const res = await fetch('/api/ui_reset', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({task_type: task_type})
@@ -317,7 +344,7 @@ async def landing_page():
             async function stepEnv(actionPayload) {
                 logMsg(`Dispatching action matrix to grader...`);
                 try {
-                    const res = await fetch('/step', {
+                    const res = await fetch('/api/ui_step', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({action: actionPayload})
