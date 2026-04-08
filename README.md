@@ -1,3 +1,11 @@
+---
+title: Email Triage MoodBox
+emoji: 🧠
+colorFrom: purple
+colorTo: blue
+sdk: docker
+pinned: false
+---
 # 📧 Email Triage Agent — OpenEnv Environment
 
 An AI agent environment that simulates real-world **email triage** — classifying, responding to, and routing incoming emails. Built on the [OpenEnv](https://github.com/meta-pytorch/OpenEnv) framework.
