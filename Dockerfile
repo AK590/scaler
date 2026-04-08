@@ -8,18 +8,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-COPY pyproject.toml /app/
+# Copy application code
+COPY . /app/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir .
-
-# Copy application code
-COPY . /app/
-
-# Install the project itself
-RUN pip install --no-cache-dir -e .
 
 # Set Python path
 ENV PYTHONPATH="/app:$PYTHONPATH"
