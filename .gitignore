@@ -1,0 +1,24 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# openenv / pip builds
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Scratch & Dev
+scratch/
+test_agent.py
+.gemini/
