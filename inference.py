@@ -27,10 +27,12 @@ from email_triage_env import EmailTriageAction, EmailTriageEnv
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-IMAGE_NAME = os.getenv("IMAGE_NAME")
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
-MODEL_NAME = os.getenv("MODEL_NAME") or "Qwen/Qwen2.5-72B-Instruct"
+API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# Optional - if you use from_docker_image():
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 
 BENCHMARK = "email_triage"
 TASKS = ["classify_email", "draft_response", "full_triage", "mood_based_triage"]
@@ -368,14 +370,14 @@ async def run_task(client: OpenAI, env: EmailTriageEnv, task_type: str) -> float
 
 async def main() -> None:
     """Run all tasks sequentially."""
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
     all_scores = {}
 
     for task_type in TASKS:
         # Create a fresh env connection for each task
-        if IMAGE_NAME:
-            env = await EmailTriageEnv.from_docker_image(IMAGE_NAME)
+        if LOCAL_IMAGE_NAME:
+            env = await EmailTriageEnv.from_docker_image(LOCAL_IMAGE_NAME)
         else:
             # Connect to running HF Space or local server
             base_url = os.getenv("ENV_BASE_URL", "http://localhost:8000")
