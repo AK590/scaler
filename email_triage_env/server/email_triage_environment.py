@@ -6,6 +6,7 @@ Implements the core environment logic: reset(), step(), state().
 
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
+import random
 
 from openenv.core.env_server.types import Action, Observation, State
 from openenv.core.env_server.interfaces import Environment
@@ -65,6 +66,10 @@ class EmailTriageEnvironment(Environment):
             task_type = "classify_email"
 
         self._emails = get_task_emails(task_type)
+        if seed is not None:
+            random.seed(seed)
+        random.shuffle(self._emails)
+        
         self._is_reset = True
 
         self._state = EmailTriageState(
