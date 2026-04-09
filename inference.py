@@ -355,7 +355,8 @@ async def run_task(client: OpenAI, env: EmailTriageEnv, task_type: str) -> float
         # Compute normalized score (average reward per email)
         if rewards:
             score = sum(rewards) / len(rewards)
-        score = min(max(score, 0.0), 1.0)
+        # Ensure score is STRICTLY between 0 and 1
+        score = min(max(score, 0.01), 0.99)
         success = score > 0.0
 
     except Exception as exc:

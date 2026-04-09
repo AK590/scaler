@@ -16,6 +16,11 @@ def _normalize(text: str) -> str:
     return text.strip().lower()
 
 
+def _clamp_score(score: float) -> float:
+    """Clamp score strictly within (0, 1) to satisfy validation constraints."""
+    return max(0.01, min(float(score), 0.99))
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # CLASSIFICATION GRADER (Easy Task)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -89,7 +94,7 @@ def grade_classification(
     else:
         feedback_parts.append("Category not provided")
 
-    return score, "; ".join(feedback_parts)
+    return _clamp_score(score), "; ".join(feedback_parts)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -113,7 +118,7 @@ def grade_response(
         (score, feedback) where score is in [0.0, 1.0]
     """
     if response is None or len(response.strip()) == 0:
-        return 0.0, "No response provided"
+        return _clamp_score(0.0), "No response provided"
 
     response_lower = response.lower()
     score = 0.0
@@ -208,7 +213,7 @@ def grade_response(
     else:
         feedback_parts.append("Professional tone")
 
-    return round(score, 4), "; ".join(feedback_parts)
+    return _clamp_score(round(score, 4)), "; ".join(feedback_parts)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -226,19 +231,19 @@ def grade_routing(
         (score, feedback) where score is in [0.0, 1.0]
     """
     if department is None:
-        return 0.0, "No routing department provided"
+        return _clamp_score(0.0), "No routing department provided"
 
     norm_dept = _normalize(department)
 
     if norm_dept == email.ground_truth_department:
-        return 1.0, f"Correct routing ({norm_dept})"
+        return _clamp_score(1.0), f"Correct routing ({norm_dept})"
     elif norm_dept in VALID_DEPARTMENTS:
-        return 0.0, (
+        return _clamp_score(0.0), (
             f"Wrong routing (predicted {norm_dept}, "
             f"expected {email.ground_truth_department})"
         )
     else:
-        return 0.0, (
+        return _clamp_score(0.0), (
             f"Invalid department '{department}'. "
             f"Valid: {', '.join(sorted(VALID_DEPARTMENTS))}"
         )
@@ -295,7 +300,7 @@ def grade_full_triage(
 
     total_score = round(min(max(total_score, 0.0), 1.0), 4)
 
-    return total_score, "; ".join(feedback_parts)
+    return _clamp_score(total_score), "; ".join(feedback_parts)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -313,19 +318,19 @@ def grade_mood_triage(
         (score, feedback) where score is in [0.0, 1.0]
     """
     if triage_action is None:
-        return 0.0, "No triage action provided"
+        return _clamp_score(0.0), "No triage action provided"
 
     norm_action = _normalize(triage_action)
 
     if norm_action == email.ground_truth_triage_action:
-        return 1.0, f"Correct action ({norm_action})"
+        return _clamp_score(1.0), f"Correct action ({norm_action})"
     elif norm_action in ["accept", "reject"]:
-        return 0.0, (
+        return _clamp_score(0.0), (
             f"Wrong action (predicted {norm_action}, "
             f"expected {email.ground_truth_triage_action})"
         )
     else:
-        return 0.0, (
+        return _clamp_score(0.0), (
             f"Invalid action '{triage_action}'. "
             f"Valid: accept, reject"
         )
