@@ -135,7 +135,7 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
     # Truncate action for readability
     action_short = action.replace("\n", " ")[:100]
     print(
-        f"[STEP] step={step} action={action_short} reward={reward:.2f} done={done_val} error={error_val}",
+        f"[STEP]  step={step} action={action_short} reward={reward:.2f} done={done_val} error={error_val}",
         flush=True,
     )
 
@@ -143,7 +143,7 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{r:.2f}" for r in rewards)
     print(
-        f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}",
+        f"[END]   success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}",
         flush=True,
     )
 
@@ -158,9 +158,9 @@ def parse_classify_response(text: str) -> Dict[str, str]:
     for line in text.strip().split("\n"):
         line = line.strip()
         if line.upper().startswith("PRIORITY:"):
-            result["priority"] = line.split(":", 1)[1].strip().lower()
+            result["priority"] = line.split(":", 1)[1].strip().lower().replace("*", "").replace('"', '')
         elif line.upper().startswith("CATEGORY:"):
-            result["category"] = line.split(":", 1)[1].strip().lower()
+            result["category"] = line.split(":", 1)[1].strip().lower().replace("*", "").replace('"', '')
     return result
 
 
@@ -170,7 +170,7 @@ def parse_mood_triage_response(text: str) -> Dict[str, str]:
     for line in text.strip().split("\n"):
         line = line.strip()
         if line.upper().startswith("ACTION:"):
-            result["triage_action"] = line.split(":", 1)[1].strip().lower()
+            result["triage_action"] = line.split(":", 1)[1].strip().lower().replace("*", "").replace('"', '')
     return result
 
 
@@ -184,13 +184,13 @@ def parse_full_triage_response(text: str) -> Dict[str, str]:
     for line in lines:
         stripped = line.strip()
         if stripped.upper().startswith("PRIORITY:"):
-            result["priority"] = stripped.split(":", 1)[1].strip().lower()
+            result["priority"] = stripped.split(":", 1)[1].strip().lower().replace("*", "").replace('"', '')
             in_response = False
         elif stripped.upper().startswith("CATEGORY:"):
-            result["category"] = stripped.split(":", 1)[1].strip().lower()
+            result["category"] = stripped.split(":", 1)[1].strip().lower().replace("*", "").replace('"', '')
             in_response = False
         elif stripped.upper().startswith("DEPARTMENT:"):
-            result["routing_department"] = stripped.split(":", 1)[1].strip().lower()
+            result["routing_department"] = stripped.split(":", 1)[1].strip().lower().replace("*", "").replace('"', '')
             in_response = False
         elif stripped.upper().startswith("RESPONSE:"):
             response_text = stripped.split(":", 1)[1].strip()
